@@ -21,11 +21,11 @@ const usuarios = [
 // ===== ROTAS ======
 
 // Rota de Login para gerar o token
-app.post('/login', (req, res) => {
+app.post('/login', async (req, res) => {
     const { usuario, senha } = req.body;
 
     // 1. Encontrar o usuário no nosso "BD"
-    const user = Paciente.find(u => u.usuario === usuario);
+    const user = await Paciente.findOne({ where: { usuario : `${usuario}` } });
 
     // 2. Verificar se o usuário existe e se a senha está correta
     if (!user || user.senha !== senha) {
