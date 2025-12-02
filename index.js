@@ -58,7 +58,6 @@ function verificaJWT(req, res, next) {
     });
 }
 
-// DEMAIS ROTAS
 
 // Rota PÚBLICA, acessível por qualquer um
 app.get('/', (req, res) => {
@@ -75,6 +74,7 @@ app.post('/pacientes', async (req, res) => {
     }
 });
 
+// ROTAS PRIVADAS
 
 app.get('/pacientes',verificaJWT, async (req, res) => {
     try {
@@ -96,6 +96,35 @@ app.get('/pacientes/:id', verificaJWT, async (req, res) => {
         res.status(500).json({ mensagem: 'Erro ao buscar estudante.' });
     }
 });
+
+app.put('/pacientes/:id', verificaJWT, async (req, res) => {
+    try {
+        const paciente = await Paciente.findByPk(req.params.id);
+        if (!paciente) {
+            return res.status(404).json({ mensagem: 'Paciente não encontrado.' });
+        }
+        await paciente.update(req.body);
+        res.status(200).json(paciente);
+    } catch (error) {
+        res.status(400).json({ mensagem: 'Erro ao atualizar paciente.', erro: error.message });
+    }
+});
+
+app.delete('/pacientes/:id',verificaJWT, async (req, res) => {
+    try {
+        const paciente = await Paciente.findByPk(req.params.id);
+        if (!paciente) {
+            return res.status(404).json({ mensagem: 'Paciente não encontrado.' });
+        }
+        await paciente.destroy();
+        res.status(204).send(); // 204: No Content
+    } catch (error) {
+        res.status(500).json({ mensagem: 'Erro ao deletar paciente.' });
+    }
+});
+
+
+
 
 
 // SERVIDOR
