@@ -12,11 +12,6 @@ const JWT_SECRET = 'seu-segredo-super-secreto'; // Em um projeto real, isso DEVE
 
 app.use(express.json());
 
-// Nosso "banco de dados" de usuários.
-const usuarios = [
-    { id: 1, usuario: 'admin', senha: '123' },
-    { id: 2, usuario: 'tiago', senha: 'abc' }
-];
 
 // ===== ROTAS ======
 
@@ -80,19 +75,26 @@ app.post('/pacientes', async (req, res) => {
     }
 });
 
-// Rota PROTEGIDA, só pode ser acessada com um token JWT válido
-// Note como passamos o middleware `verificaJWT` antes da função da rota.
-app.get('/alunos', verificaJWT, (req, res) => {
-    // Graças ao middleware, temos acesso a req.usuarioLogado
-    console.log('Acessado por:', req.usuarioLogado);
 
-    res.json({
-        mensagem: `Acesso permitido para o usuário: ${req.usuarioLogado.usuario}.`,
-        alunos: [
-            { id: 1, nome: 'João' },
-            { id: 2, nome: 'Maria' }
-        ]
-    });
+app.get('/pacientes',verificaJWT, async (req, res) => {
+    try {
+        const pacientes = await Paciente.findAll();
+        res.status(200).json(pacientes);
+    } catch (error) {
+        res.status(500).json({ mensagem: 'Erro ao buscar pacientes.' });
+    }
+});
+
+app.get('/pacientes/:id', verificaJWT, async (req, res) => {
+    try {
+        const paciente = await Paciente.findByPk(req.params.id); // findByPk = Find by Primary Key
+        if (!paciente) {
+            return res.status(404).json({ mensagem: 'Paciente não encontrado.' });
+        }
+        res.status(200).json(paciente);
+    } catch (error) {
+        res.status(500).json({ mensagem: 'Erro ao buscar estudante.' });
+    }
 });
 
 
